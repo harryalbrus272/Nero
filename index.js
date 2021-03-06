@@ -1,24 +1,15 @@
-const { ApolloServer } = require('apollo-server');
-const gql = require('graphql-tag');
-const db = require('./config/mongoose');
+const { ApolloServer } = require("apollo-server");
+const db = require("./config/mongoose");
+const Post = require("./models/Post");
 
-//exclamation for required tabs
-const typeDefs = gql`
-    type Query{
-        sayHi : String
-    }`
-const resolvers = {
-    Query : {
-        sayHi : () => 'Hello World!'
-    }
-}
+const typeDefs = require('./graphql/typedefs'); 
+const resolvers = require('./graphql/resolvers');
 
 const server = new ApolloServer({
-    typeDefs,
-    resolvers
+  typeDefs,
+  resolvers,
 });
 
-
-server.listen({port : 5000}).then(res => {
-    console.log(`Server running at ${res.url}`);
-})
+server.listen({ port: 5000 }).then((res) => {
+  console.log(`Server running at ${res.url}`);
+});
