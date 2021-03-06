@@ -1,11 +1,54 @@
 const User = require("../../models/User");
 //use specific errors from apollo
 const { UserInputError } = require('apollo-server');
+const { validateRegisterInput, validateLoginInput } = require('../../util/validators');
 const brypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { SECRET_KEY } = require("../../config/config");
+
+const generateToken = (user) => {
+    return jwt.sign(
+        {
+          id: user.id,
+          email: user.email,
+          username: user.username,
+        },
+        SECRET_KEY,
+        { expiresIn: "1h" }
+      );
+}
 module.exports = {
   Mutation: {
+    //validate login
+    async login(_, { username, password }){
+        const { errors, valid } = validateLoginInput (username,password);
+        const user = await User.findOne({ username });
+        if(!valid){
+            throw new UserInputError('Errors', {errors});
+        }
+
+        if(!user){
+            errors.general = 'User not found';
+            throw new UserInputError('User not Found', {errors});
+        }
+
+        const match = await brypt.compare(password, user.password);
+        if(!match){
+            errors.general = 'User not found';
+            throw new UserInputError('Wrong Credentials', {errors});
+        }
+
+        const token = generateToken(user);
+
+
+        return{
+            ...user._doc,
+            id: user._id,
+            token
+        };
+    },
+
+
     //register(parent, args, context, info) written as
     //parent - what was the input from the last steps. When data travels ans processed through many resolvers
     //args - used most of the times. It takes the input
@@ -21,7 +64,10 @@ module.exports = {
       //TODO:validate user data
       //Make sure that user doesn't already exist
       //Hash the passwords and create authentication
-
+      const { valid,errors } = validateRegisterInput( username, email, password, confirmPassword ); 
+      if(!valid){
+          throw new UserInputError('Errors',{ errors });
+      }   
       const user = await User.findOne({username});
       if(user){
           throw new UserInputError('Username is taken',{
@@ -40,18 +86,10 @@ module.exports = {
       });
 
       const res = await newUser.save();
-      const token = jwt.sign(
-        {
-          id: res.id,
-          email: res.email,
-          username: res.username,
-        },
-        SECRET_KEY,
-        { expiresIn: "1h" }
-      );
+      const token = generateToken(res);
       return{
           ...res._doc,
-          id: res.id,
+          id: res._id,
           token
       };
     },
