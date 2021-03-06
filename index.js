@@ -1,6 +1,8 @@
 const { ApolloServer } = require('apollo-server');
 const gql = require('graphql-tag');
-//exclamation for required
+const db = require('./config/mongoose');
+
+//exclamation for required tabs
 const typeDefs = gql`
     type Query{
         sayHi : String
@@ -16,7 +18,6 @@ const server = new ApolloServer({
     resolvers
 });
 
-HJiuwiiYtU9vsJR
 
 server.listen({port : 5000}).then(res => {
     console.log(`Server running at ${res.url}`);
