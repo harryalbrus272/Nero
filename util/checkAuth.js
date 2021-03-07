@@ -1,4 +1,4 @@
-const { AuthenticationEror } = require('apollo-server');
+const { AuthenticationError } = require('apollo-server');
 const jwt = require('jsonwebtoken');
 const { SECRET_KEY } = require('../config/config');
 module.exports = (context) => {
@@ -11,7 +11,7 @@ module.exports = (context) => {
                 const user = jwt.verify(token, SECRET_KEY);
                 return user;
             } catch (error) {
-                throw new AuthenticationEror('Invalid/Expitred token');
+                throw new AuthenticationError('Invalid/Expired token');
             }
         }
         throw new Error('Authentication token must be \'Bearer [token]');
