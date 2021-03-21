@@ -30,7 +30,7 @@ module.exports = {
       const user = checkAuth(context);
       //All the token error has already been handled by checkAuth middleware
 
-      if(args.body.trim() === ''){
+      if(body.trim() === ''){
           throw new Error('Post body must not be empty');
       }
       const newPost = new Post({
